@@ -1,0 +1,11 @@
+name: non-co2-forcing
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - jupyter
+  - jupytext
+  - matplotlib
+  - numpy
+  - pandas
+  - scipy
