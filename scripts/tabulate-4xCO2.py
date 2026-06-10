@@ -22,7 +22,7 @@ maxlen = 0
 # behaving ensemble member
 multi_runs = {
     "GISS-E2-1-G": "r1i1p1f1",
-    "GISS-E2-1-H": "r1i1p3f1",
+    "GISS-E2-1-H": "r1i1p1f1",
     "MRI-ESM2-0": "r1i1p1f1",
     "EC-Earth3": "r3i1p1f1",
     "FIO-ESM-2-0": "r1i1p1f1",
