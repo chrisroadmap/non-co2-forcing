@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
+  - fair==2.2.4
   - jupyter
   - jupytext
   - matplotlib
