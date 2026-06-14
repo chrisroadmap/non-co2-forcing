@@ -110,4 +110,12 @@ for idx, row in ebm_df.iterrows():
 
 fig.tight_layout()
 
+# %% [markdown]
+# Notes:
+#
+# - FIO-ESM-2-0 (missing 1pctCO2)
+# - KACE-1-0-G (missing 1pctCO2)
+# - GISS-E2-1-G (looks like 1pctCO2 is held after 70 years)
+# - KIOST-ESM (doesn't seem to be in balance in year zero)
+
 # %%

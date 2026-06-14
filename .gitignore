@@ -1,3 +1,9 @@
+# testing
+plots/diagnostics
+
+# large output files
+output/results.pickle
+
 # notebooks
 *.ipynb
 
