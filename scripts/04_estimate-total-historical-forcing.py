@@ -68,7 +68,6 @@ for idx, row in tqdm(ebm_df.iterrows()):
     if len(available_files) == 0:
         continue
     data[row.model] = {}
-    data[row.model]['abrupt-4xCO2'] = row.run
     data[row.model]['historical'] = {}
     for file in available_files:
         run = PurePath(file).parts[6].split("_")[2]
@@ -86,6 +85,8 @@ for idx, row in tqdm(ebm_df.iterrows()):
             hist_df.loc[1850, 'tas'] = 0
 
         # TODO: remove short run 1 and run 4 from E3SM-1-0
+
+        # TODO: remove r10 from EC-Earth3-Veg - missing 1880
 
         # EBM parameters
         C1 = ebm_df.loc[ebm_df['model']==row.model, 'C1'].values[0]
@@ -202,57 +203,5 @@ for idx, row in ebm_df.iterrows():
 # %%
 with open('../output/results.pickle', 'wb') as handle:
     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-# %%
-non_co2_fraction = {}
-for idx, row in ebm_df.iterrows():
-    if row.model not in data:
-        continue
-    non_co2_fraction[row.model] = {}
-    n_runs = len(data[row.model]['historical'])
-    tempsum = 0
-    for irun, run in enumerate(data[row.model]['historical']):
-        non_co2_fraction[row.model][run] = (
-            data[row.model]['historical'][run]['forcing_nonco2'][155:165].mean() / 
-            data[row.model]['historical'][run]['forcing_fitted'][155:165].mean()
-        )
-        if not np.isnan(non_co2_fraction[row.model][run]):
-            tempsum = tempsum + non_co2_fraction[row.model][run]
-        else:
-            n_runs = n_runs - 1
-    non_co2_fraction[row.model]['mean'] = tempsum / n_runs
-
-# %%
-non_co2_fraction_mean = {}
-for idx, row in ebm_df.iterrows():
-    if row.model not in data:
-        continue
-    non_co2_fraction_mean[row.model] = non_co2_fraction[row.model]['mean']
-
-non_co2_fraction_mean
-non_co2_fraction_mean_df = pd.DataFrame(non_co2_fraction_mean, index = ['mean']).T
-
-# %%
-non_co2_fraction_mean_df.sort_values('mean')
-
-# %%
-fig, ax = pl.subplots(figsize=(12, 6))
-imodel = 0
-for fillbounds in np.arange(-0.5, 46, 2):
-    ax.fill_between([fillbounds, fillbounds+1], -0.75, 0.4, color='0.95')
-for model, row in non_co2_fraction_mean_df.sort_values('mean').iterrows():
-    # print(row.model, non_co2_fraction[row.model]['mean'])
-    for run in data[model]['historical']:
-        ax.scatter(imodel, non_co2_fraction[model][run], marker='x', color='0.6', s=9)
-    ax.scatter(imodel, row['mean'], marker='_', color='k', s=49)
-    imodel=imodel+1
-ax.axhline(0, ls=':', color='k')
-ax.set_xticks(np.arange(len(non_co2_fraction_mean_df)));
-ax.set_xticklabels(non_co2_fraction_mean_df.sort_values('mean').index, rotation=90);
-ax.set_xlim(-0.5, 45.5)
-ax.set_ylim(-0.75, 0.4)
-ax.set_title('non-CO2 forcing fraction in CMIP6 historical simulations, 2005-14 relative to 1850')
-fig.tight_layout()
-pl.savefig('../plots/non-co2-fraction-historical.png')
 
 # %%

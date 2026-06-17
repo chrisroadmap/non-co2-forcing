@@ -1,8 +1,8 @@
 # testing
-plots/diagnostics
+plots/
 
 # large output files
-output/results.pickle
+output/*.pickle
 
 # notebooks
 *.ipynb
