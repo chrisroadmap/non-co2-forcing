@@ -30,10 +30,14 @@ sudo apt install cmake
 
 If not, grab `R` from https://www.r-project.org/. `cmake` is probably also freely distributed somewhere.
 
-Second, you'll need Donald Cummins' `EBM` package binary, which can be downloaded from [here](https://github.com/donaldcummins/EBM/archive/refs/tags/v1.1.0.tar.gz). Download this file into the `r_scripts` directory. Then
+Second, you'll need Donald Cummins' `EBM` package binary, which can be downloaded from [here](https://github.com/donaldcummins/EBM/archive/refs/tags/v1.1.0.tar.gz). Download this file into base directory. Then
 
 ```
-cd r_scripts
 R
 > install.packages(c("expm", "FKF", "nloptr", "numDeriv"))
 > install.packages("./EBM-1.1.0.tar.gz", repos = NULL)
+```
+
+## Reproduction
+
+`cd` to the `scripts` directory and run everything in order. Scripts number 1 and 2 are executable, after this you should open them in a `jupyter` notebook.
