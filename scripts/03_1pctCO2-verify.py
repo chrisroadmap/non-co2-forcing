@@ -55,45 +55,48 @@ myhre(1.01 ** np.arange(151) * x0, ebm_df.loc[ebm_df['model']=='UKESM1-0-LL', 'a
 
 # %%
 # we don't have 1pctCO2 or scenario projections from KACE or FIO, so delete them now
-ebm_df.drop(ebm_df["model"].isin(["KACE-1-0-G", "FIO-ESM-2-0"]).index)
+ebm_df_exists = ebm_df.drop(ebm_df.loc[(ebm_df["model"].isin(("KACE-1-0-G", "FIO-ESM-2-0")))].index)
 
 # %%
-ebm_df_sorted = ebm_df.sort_values(by=['model']).reset_index(drop=True)
+ebm_df_sorted = ebm_df_exists.sort_values(by=['model']).reset_index(drop=True)
 
 # %%
 fig, ax = pl.subplots(7, 7, figsize=(18/2.54, 22/2.54))
 
 for idx, row in ebm_df_sorted.iterrows():
-    try:
-        test_df = pd.read_csv(f'../data/cmip6-hbf/cmip_data/{row.model}/1pctCO2/{row.model}_1pctCO2_{row.run}_anomalies.csv', index_col=0)
-        # res, ebm = run_model(test_df, row.model)
-        test_df['rndt'] = test_df['rsdt'] - test_df['rsut'] - test_df['rlut']
-        C1 = row.C1
-        C2 = row.C2
-        kappa1 = row.kappa1
-        kappa2 = row.kappa2
-        epsilon = row.epsilon
-        
-        ebm = EnergyBalanceModel(
+    test_df = pd.read_csv(f'../data/cmip6-hbf/cmip_data/{row.model}/1pctCO2/{row.model}_1pctCO2_{row.run}_anomalies.csv', index_col=0)
+    # res, ebm = run_model(test_df, row.model)
+    test_df['rndt'] = test_df['rsdt'] - test_df['rsut'] - test_df['rlut']
+    C1 = row.C1
+    C2 = row.C2
+    kappa1 = row.kappa1
+    kappa2 = row.kappa2
+    epsilon = row.epsilon
+    
+    ebm = EnergyBalanceModel(
+        ocean_heat_capacity=[C1, C2],
+        ocean_heat_transfer=[kappa1, kappa2],
+        deep_ocean_efficacy=epsilon
+    )
+
+    ebm.add_forcing(myhre(1.01 ** np.arange(len(test_df.tas.values)) * x0, row.alpha), timestep=1)
+    ebm.run()
+
+    l1, = ax[idx//7, idx%7].plot(test_df.tas.values, color='r', ls='--', label='ESM', lw=1)
+    l2, = ax[idx//7, idx%7].plot(ebm.temperature[:, 0], color='k', label='EBM fit', lw=1)
+
+    if row.model=='GISS-E2-1-G':
+        ebm2xhold = EnergyBalanceModel(
             ocean_heat_capacity=[C1, C2],
             ocean_heat_transfer=[kappa1, kappa2],
             deep_ocean_efficacy=epsilon
         )
+        ebm2xhold.add_forcing(myhre(np.concatenate([1.01 ** np.arange(70), np.ones(80)*2]) * x0, row.alpha), timestep=1)
+        ebm2xhold.run()
+        ax[idx//7, idx%7].plot(ebm2xhold.temperature[:, 0], color='k', ls='--', lw=1)
+    
+    ax[idx//7, idx%7].set_title(row.model, fontsize=7)
 
-        ebm.add_forcing(myhre(1.01 ** np.arange(len(test_df.tas.values)) * x0, row.alpha), timestep=1)
-        ebm.run()
-
-        ax[idx//7, idx%7].plot(test_df.tas.values, color='r', ls='--', label='ESM', lw=1)
-        ax[idx//7, idx%7].plot(ebm.temperature[:, 0], color='k', label='EBM fit', lw=1)
-        
-        ax[idx//7, idx%7].set_title(row.model, fontsize=7)
-    except:
-        ax[idx//7, idx%7].set_title(row.model, fontsize=7)
-        ax[idx//7, idx%7].axis('off')
-        print(row.model)
-
-    if idx==1:
-        ax[idx//7, idx%7].legend(frameon=False)
     if idx%7==0:
         ax[idx//7, idx%7].set_ylabel('°C')
     ax[idx//7, idx%7].set_xlim(0, 150)
@@ -104,6 +107,10 @@ for idx, row in ebm_df_sorted.iterrows():
     xTick_objects[-1].label1.set_horizontalalignment('right')
     ax[idx//7, idx%7].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(5))
    
+ax[6, 5].axis('off')
+ax[6, 6].axis('off')
+
+ax[6, 5].legend([l1, l2], ['ESM', 'EBM fit'], loc='upper left', frameon=False)
 
 fig.tight_layout()
 pl.savefig('../plots/1pctCO2-validation-tas.png')
@@ -122,36 +129,41 @@ pl.savefig('../plots/1pctCO2-validation-tas.png')
 fig, ax = pl.subplots(7, 7, figsize=(18/2.54, 22/2.54))
 
 for idx, row in ebm_df_sorted.iterrows():
-    try:
-        test_df = pd.read_csv(f'../data/cmip6-hbf/cmip_data/{row.model}/1pctCO2/{row.model}_1pctCO2_{row.run}_anomalies.csv', index_col=0)
-        # res, ebm = run_model(test_df, row.model)
-        test_df['rndt'] = test_df['rsdt'] - test_df['rsut'] - test_df['rlut']
-        C1 = row.C1
-        C2 = row.C2
-        kappa1 = row.kappa1
-        kappa2 = row.kappa2
-        epsilon = row.epsilon
-        
-        ebm = EnergyBalanceModel(
+    test_df = pd.read_csv(f'../data/cmip6-hbf/cmip_data/{row.model}/1pctCO2/{row.model}_1pctCO2_{row.run}_anomalies.csv', index_col=0)
+    # res, ebm = run_model(test_df, row.model)
+    test_df['rndt'] = test_df['rsdt'] - test_df['rsut'] - test_df['rlut']
+    C1 = row.C1
+    C2 = row.C2
+    kappa1 = row.kappa1
+    kappa2 = row.kappa2
+    epsilon = row.epsilon
+    
+    ebm = EnergyBalanceModel(
+        ocean_heat_capacity=[C1, C2],
+        ocean_heat_transfer=[kappa1, kappa2],
+        deep_ocean_efficacy=epsilon
+    )
+
+    ebm.add_forcing(myhre(1.01 ** np.arange(len(test_df.tas.values)) * x0, row.alpha), timestep=1)
+    ebm.run()
+   
+    l1, = ax[idx//7, idx%7].plot(test_df.rndt.values, color='g', ls='--', label='ESM', lw=1)
+    l2, = ax[idx//7, idx%7].plot(ebm.toa_imbalance, color='k', label='EBM fit', lw=1)
+
+    if row.model=='GISS-E2-1-G':
+        ebm2xhold = EnergyBalanceModel(
             ocean_heat_capacity=[C1, C2],
             ocean_heat_transfer=[kappa1, kappa2],
             deep_ocean_efficacy=epsilon
         )
-
-        ebm.add_forcing(myhre(1.01 ** np.arange(len(test_df.tas.values)) * x0, row.alpha), timestep=1)
-        ebm.run()
+        ebm2xhold.add_forcing(myhre(np.concatenate([1.01 ** np.arange(70), np.ones(80)*2]) * x0, row.alpha), timestep=1)
+        ebm2xhold.run()
+        ax[idx//7, idx%7].plot(ebm2xhold.toa_imbalance, color='k', ls='--', lw=1)
     
-        ax[idx//7, idx%7].plot(test_df.rndt.values, color='g', ls='--', label='ESM', lw=1)
-        ax[idx//7, idx%7].plot(ebm.toa_imbalance, color='k', label='EBM fit', lw=1)
-        
-        ax[idx//7, idx%7].set_title(row.model, fontsize=7)
-    except:
-        ax[idx//7, idx%7].set_title(row.model, fontsize=7)
-        ax[idx//7, idx%7].axis('off')
-        print(row.model)
+    ax[idx//7, idx%7].set_title(row.model, fontsize=7)
 
-    if idx==3:
-        ax[idx//7, idx%7].legend(frameon=False)
+    # if idx==3:
+    #     ax[idx//7, idx%7].legend(frameon=False)
     if idx%7==0:
         ax[idx//7, idx%7].set_ylabel('W m$^{-2}$')
     ax[idx//7, idx%7].set_xlim(0, 150)
@@ -162,6 +174,11 @@ for idx, row in ebm_df_sorted.iterrows():
     xTick_objects[-1].label1.set_horizontalalignment('right')
     ax[idx//7, idx%7].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator(5))
    
+
+ax[6, 5].axis('off')
+ax[6, 6].axis('off')
+
+ax[6, 5].legend([l1, l2], ['ESM', 'EBM fit'], loc='upper left', frameon=False)
 
 fig.tight_layout()
 pl.savefig('../plots/1pctCO2-validation-rndt.png')
