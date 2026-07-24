@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.3
+#       jupytext_version: 1.19.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -19,8 +19,23 @@ import pandas as pd
 import matplotlib.pyplot as pl
 
 # %%
+pl.style.use('../defaults.mplstyle')
+pl.rcParams['xtick.minor.visible'] = False
+pl.rcParams['xtick.major.top'] = False
+pl.rcParams['xtick.top'] = False
+pl.rcParams['xtick.major.size'] = 0
+#pl.rcParams['xtick.bottom'] = False
+
+# %%
 with open('../output/results.pickle', 'rb') as handle:
     data = pickle.load(handle)
+
+# %%
+len(data.keys())
+
+# %%
+# has a strange offset issue in 1pctCO2 and historical simulation also starts a bit warm - better to not trust
+del data['KIOST-ESM']
 
 # %%
 len(data.keys())
@@ -65,9 +80,9 @@ non_co2_absolute_mean_df = pd.DataFrame(non_co2_absolute_mean, index = ['mean'])
 non_co2_fraction_mean_df.sort_values('mean')
 
 # %%
-fig, ax = pl.subplots(figsize=(12, 6))
+fig, ax = pl.subplots(figsize=(18/2.54, 10/2.54))
 imodel = 0
-for fillbounds in np.arange(-0.5, 46, 2):
+for fillbounds in np.arange(-0.5, len(data.keys()), 2):
     ax.fill_between([fillbounds, fillbounds+1], -0.75, 0.4, color='0.95')
 for model, row in non_co2_fraction_mean_df.sort_values('mean').iterrows():
     # print(row.model, non_co2_fraction[row.model]['mean'])
@@ -78,16 +93,16 @@ for model, row in non_co2_fraction_mean_df.sort_values('mean').iterrows():
 ax.axhline(0, ls=':', color='k')
 ax.set_xticks(np.arange(len(non_co2_fraction_mean_df)));
 ax.set_xticklabels(non_co2_fraction_mean_df.sort_values('mean').index, rotation=90);
-ax.set_xlim(-0.5, 45.5)
+ax.set_xlim(-0.8, len(data.keys())-0.2)
 ax.set_ylim(-0.75, 0.4)
 ax.set_title('non-CO2 forcing fraction in CMIP6 historical simulations, 2005-14 relative to 1850')
 fig.tight_layout()
 pl.savefig('../plots/non-co2-fraction-historical.png')
 
 # %%
-fig, ax = pl.subplots(figsize=(12, 6))
+fig, ax = pl.subplots(figsize=(18/2.54, 10/2.54))
 imodel = 0
-for fillbounds in np.arange(-0.5, 46, 2):
+for fillbounds in np.arange(-0.5, len(data.keys()), 2):
     ax.fill_between([fillbounds, fillbounds+1], -0.8, 1, color='0.95')
 for model, row in non_co2_absolute_mean_df.sort_values('mean').iterrows():
     # print(row.model, non_co2_fraction[row.model]['mean'])
@@ -98,9 +113,10 @@ for model, row in non_co2_absolute_mean_df.sort_values('mean').iterrows():
 ax.axhline(0, ls=':', color='k')
 ax.set_xticks(np.arange(len(non_co2_absolute_mean_df)));
 ax.set_xticklabels(non_co2_absolute_mean_df.sort_values('mean').index, rotation=90);
-ax.set_xlim(-0.5, 45.5)
+ax.set_xlim(-0.8, len(data.keys())-0.2)
 ax.set_ylim(-0.8, 1.0)
 ax.set_title('non-CO2 forcing in CMIP6 historical simulations, 2005-14 relative to 1850')
+ax.set_ylabel('W m$^{-2}$')
 fig.tight_layout()
 pl.savefig('../plots/non-co2-absolute-historical.png')
 
