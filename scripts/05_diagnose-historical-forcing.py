@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.4
+#       jupytext_version: 1.19.3
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -32,6 +32,9 @@ with open('../output/results.pickle', 'rb') as handle:
 
 # %%
 len(data.keys())
+
+# %%
+data['UKESM1-0-LL']['historical'].keys()
 
 # %%
 # has a strange offset issue in 1pctCO2 and historical simulation also starts a bit warm - better to not trust
@@ -95,7 +98,7 @@ ax.set_xticks(np.arange(len(non_co2_fraction_mean_df)));
 ax.set_xticklabels(non_co2_fraction_mean_df.sort_values('mean').index, rotation=90);
 ax.set_xlim(-0.8, len(data.keys())-0.2)
 ax.set_ylim(-0.75, 0.4)
-ax.set_title('non-CO2 forcing fraction in CMIP6 historical simulations, 2005-14 relative to 1850')
+ax.set_title('non-CO$_2$ forcing fraction in CMIP6 historical simulations, 2005-14 relative to 1850')
 fig.tight_layout()
 pl.savefig('../plots/non-co2-fraction-historical.png')
 
@@ -115,7 +118,7 @@ ax.set_xticks(np.arange(len(non_co2_absolute_mean_df)));
 ax.set_xticklabels(non_co2_absolute_mean_df.sort_values('mean').index, rotation=90);
 ax.set_xlim(-0.8, len(data.keys())-0.2)
 ax.set_ylim(-0.8, 1.0)
-ax.set_title('non-CO2 forcing in CMIP6 historical simulations, 2005-14 relative to 1850')
+ax.set_title('non-CO$_2$ forcing in CMIP6 historical simulations, 2005-14 relative to 1850')
 ax.set_ylabel('W m$^{-2}$')
 fig.tight_layout()
 pl.savefig('../plots/non-co2-absolute-historical.png')

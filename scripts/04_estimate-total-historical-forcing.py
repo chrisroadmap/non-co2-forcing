@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.4
+#       jupytext_version: 1.19.3
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -53,18 +53,25 @@ def cost_function(forcing, tas_truth, rndt_truth, C1, C2, kappa1, kappa2, epsilo
 
 
 # %%
-overrides = {
-    'GISS-E2-1-H': 'r*i1p1f2',
-    'CanESM5': 'r*i1p2f1',
-}
+overrides = {}
+for idx, row in ebm_df.iterrows():
+    overrides[row.model] = 'r*' + row.run[-6:]
+
+# %%
+overrides
+
+# %%
+overrides['GISS-E2-1-G'] = 'r*i1p1f1'
+overrides['GISS-E2-1-H'] = 'r*i1p1f2'
+overrides['CanESM5'] = 'r*i1p2f1'
 
 
 # %%
 data = {}
 
 for idx, row in tqdm(ebm_df.iterrows()):
-    pattern_match = 'r*' + row.run[-6:]
-    available_files = glob.glob(f"../data/cmip6-hbf/cmip_data/{row.model}/historical/*_{pattern_match}_*")
+    # pattern_match = 'r*' + row.run[-6:]
+    available_files = glob.glob(f"../data/cmip6-hbf/cmip_data/{row.model}/historical/*_{overrides[row.model]}_*")
     if len(available_files) == 0:
         continue
     data[row.model] = {}

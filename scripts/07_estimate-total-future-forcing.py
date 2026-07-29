@@ -52,11 +52,7 @@ def cost_function(forcing, tas_truth, rndt_truth, C1, C2, kappa1, kappa2, epsilo
 
 
 # %%
-overrides = {}
-for idx, row in ebm_df.iterrows():
-    overrides[row.model] = 'r*' + row.run[-6:]
-
-# %%
+overrides = {model: '*' for model in data}
 overrides['GISS-E2-1-H'] = 'r*i1p1f2'
 overrides['CanESM5'] = 'r*i1p2f1'
 
@@ -67,7 +63,7 @@ del data['KIOST-ESM']
 # %%
 for model in tqdm(data):
     for scenario in ['ssp119', 'ssp126', 'ssp245', 'ssp370', 'ssp585']:
-        available_files = glob.glob(f"../data/cmip6-hbf/cmip_data/{model}/{scenario}/*_{overrides[model]}_*.csv")
+        available_files = glob.glob(f"../data/cmip6-hbf/cmip_data/{model}/{scenario}/*{overrides[model]}*.csv")
         if len(available_files) > 0:
             data[model][scenario] = {}
         for file in available_files:
@@ -82,10 +78,6 @@ for model in tqdm(data):
             if model=='EC-Earth3-Veg':
                 if int(run.split('i')[0][1:]) == 10:
                     continue
-
-            # ECHAM and BCC only has ssp370 to 2055, less useful
-            if model in ['BCC-ESM1', 'MPI-ESM1-2-HAM']:
-                continue
             
             if run in data[model]['historical']:
                 data[model][scenario][run] = {}
